@@ -21,6 +21,7 @@ import com.alibaba.cloud.nacos.refresh.NacosRefreshHistory;
 import com.alibaba.cloud.nacos.refresh.NacosRefreshProperties;
 
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -32,6 +33,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConditionalOnProperty(name = "spring.cloud.nacos.config.enabled", matchIfMissing = true)
 public class NacosConfigAutoConfiguration {
+
+	@Autowired
+	private NacosConfigManager nacosConfigManager;
 
 	@Bean
 	public NacosConfigProperties nacosConfigProperties(ApplicationContext context) {
@@ -60,6 +64,6 @@ public class NacosConfigAutoConfiguration {
 			NacosRefreshProperties nacosRefreshProperties,
 			NacosRefreshHistory refreshHistory) {
 		return new NacosContextRefresher(nacosRefreshProperties, refreshHistory,
-				configProperties.configServiceInstance());
+				nacosConfigManager.configServiceInstance());
 	}
 }

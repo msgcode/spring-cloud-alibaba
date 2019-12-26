@@ -18,6 +18,7 @@ package com.alibaba.cloud.nacos.client;
 
 import java.util.List;
 
+import com.alibaba.cloud.nacos.NacosConfigManager;
 import com.alibaba.cloud.nacos.NacosConfigProperties;
 import com.alibaba.cloud.nacos.NacosPropertySourceRepository;
 import com.alibaba.cloud.nacos.parser.NacosDataParserHandler;
@@ -57,14 +58,17 @@ public class NacosPropertySourceLocator implements PropertySourceLocator {
 
 	private NacosConfigProperties nacosConfigProperties;
 
-	public NacosPropertySourceLocator(NacosConfigProperties nacosConfigProperties) {
+	private NacosConfigManager nacosConfigManager;
+
+	public NacosPropertySourceLocator(NacosConfigProperties nacosConfigProperties, NacosConfigManager nacosConfigManager) {
 		this.nacosConfigProperties = nacosConfigProperties;
+		this.nacosConfigManager = nacosConfigManager;
 	}
 
 	@Override
 	public PropertySource<?> locate(Environment env) {
 
-		ConfigService configService = nacosConfigProperties.configServiceInstance();
+		ConfigService configService = nacosConfigManager.configServiceInstance();
 
 		if (null == configService) {
 			log.warn("no instance of config service found, can't load config from nacos");
@@ -171,8 +175,8 @@ public class NacosPropertySourceLocator implements PropertySourceLocator {
 	}
 
 	private void loadNacosDataIfPresent(final CompositePropertySource composite,
-			final String dataId, final String group, String fileExtension,
-			boolean isRefreshable) {
+										final String dataId, final String group, String fileExtension,
+										boolean isRefreshable) {
 		if (null == dataId || dataId.trim().length() < 1) {
 			return;
 		}
@@ -185,7 +189,7 @@ public class NacosPropertySourceLocator implements PropertySourceLocator {
 	}
 
 	private NacosPropertySource loadNacosPropertySource(final String dataId,
-			final String group, String fileExtension, boolean isRefreshable) {
+														final String group, String fileExtension, boolean isRefreshable) {
 		if (NacosContextRefresher.getRefreshCount() != 0) {
 			if (!isRefreshable) {
 				return NacosPropertySourceRepository.getNacosPropertySource(dataId);
@@ -200,7 +204,7 @@ public class NacosPropertySourceLocator implements PropertySourceLocator {
 	 * configuration.
 	 */
 	private void addFirstPropertySource(final CompositePropertySource composite,
-			NacosPropertySource nacosPropertySource, boolean ignoreEmpty) {
+										NacosPropertySource nacosPropertySource, boolean ignoreEmpty) {
 		if (null == nacosPropertySource || null == composite) {
 			return;
 		}

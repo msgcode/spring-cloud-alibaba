@@ -68,26 +68,6 @@ public class NacosConfigProperties {
 	private static final Logger log = LoggerFactory
 			.getLogger(NacosConfigProperties.class);
 
-	@Autowired
-	private Environment environment;
-
-	@PostConstruct
-	public void init() {
-		this.overrideFromEnv();
-	}
-
-	private void overrideFromEnv() {
-		if (StringUtils.isEmpty(this.getServerAddr())) {
-			String serverAddr = environment
-					.resolvePlaceholders("${spring.cloud.nacos.config.server-addr:}");
-			if (StringUtils.isEmpty(serverAddr)) {
-				serverAddr = environment
-						.resolvePlaceholders("${spring.cloud.nacos.server-addr:}");
-			}
-			this.setServerAddr(serverAddr);
-		}
-	}
-
 	/**
 	 * nacos config server address.
 	 */
@@ -193,8 +173,6 @@ public class NacosConfigProperties {
 	 * a set of extended configurations .
 	 */
 	private List<Config> extConfig;
-
-	private static ConfigService configService;
 
 	// todo sts support
 
@@ -358,22 +336,22 @@ public class NacosConfigProperties {
 		this.name = name;
 	}
 
-	/**
-	 * @return ConfigService
-	 */
-	public ConfigService configServiceInstance() {
-		if (null == configService) {
-			try {
-				configService = NacosFactory
-						.createConfigService(getConfigServiceProperties());
-			}
-			catch (NacosException e) {
-				throw new NacosConnectionFailureException(this.getServerAddr(),
-						e.getMessage(), e);
-			}
-		}
-		return configService;
-	}
+//	/**
+//	 * @return ConfigService
+//	 */
+//	public ConfigService configServiceInstance() {
+//		if (null == configService) {
+//			try {
+//				configService = NacosFactory
+//						.createConfigService(getConfigServiceProperties());
+//			}
+//			catch (NacosException e) {
+//				throw new NacosConnectionFailureException(this.getServerAddr(),
+//						e.getMessage(), e);
+//			}
+//		}
+//		return configService;
+//	}
 
 	public Properties getConfigServiceProperties() {
 		Properties properties = new Properties();

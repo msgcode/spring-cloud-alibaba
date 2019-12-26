@@ -16,6 +16,7 @@
 
 package com.alibaba.cloud.nacos.endpoint;
 
+import com.alibaba.cloud.nacos.NacosConfigManager;
 import com.alibaba.cloud.nacos.NacosConfigProperties;
 import com.alibaba.cloud.nacos.refresh.NacosRefreshHistory;
 
@@ -38,6 +39,9 @@ public class NacosConfigEndpointAutoConfiguration {
 	private NacosConfigProperties nacosConfigProperties;
 
 	@Autowired
+	private NacosConfigManager nacosConfigManager;
+
+	@Autowired
 	private NacosRefreshHistory nacosRefreshHistory;
 
 	@ConditionalOnMissingBean
@@ -49,6 +53,6 @@ public class NacosConfigEndpointAutoConfiguration {
 	@Bean
 	public NacosConfigHealthIndicator nacosConfigHealthIndicator() {
 		return new NacosConfigHealthIndicator(
-				nacosConfigProperties.configServiceInstance());
+				nacosConfigManager.configServiceInstance());
 	}
 }
