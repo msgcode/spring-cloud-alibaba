@@ -1,11 +1,11 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright (C) 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      https://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,11 +17,8 @@
 package com.alibaba.cloud.nacos;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
@@ -29,13 +26,12 @@ import com.alibaba.cloud.nacos.diagnostics.analyzer.NacosConnectionFailureExcept
 import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.config.ConfigService;
 import com.alibaba.nacos.api.exception.NacosException;
-import com.alibaba.spring.util.PropertySourcesUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 
@@ -69,30 +65,8 @@ public class NacosConfigProperties {
 	 */
 	public static final String PREFIX = "spring.cloud.nacos.config";
 
-	private static final Pattern PATTERN = Pattern.compile("-(\\w)");
-
 	private static final Logger log = LoggerFactory
 			.getLogger(NacosConfigProperties.class);
-
-	@Autowired
-	private Environment environment;
-
-	@PostConstruct
-	public void init() {
-		this.overrideFromEnv();
-	}
-
-	private void overrideFromEnv() {
-		if (StringUtils.isEmpty(this.getServerAddr())) {
-			String serverAddr = environment
-					.resolvePlaceholders("${spring.cloud.nacos.config.server-addr:}");
-			if (StringUtils.isEmpty(serverAddr)) {
-				serverAddr = environment.resolvePlaceholders(
-						"${spring.cloud.nacos.server-addr:localhost:8848}");
-			}
-			this.setServerAddr(serverAddr);
-		}
-	}
 
 	/**
 	 * nacos config server address.
@@ -199,8 +173,6 @@ public class NacosConfigProperties {
 	 * a set of extended configurations .
 	 */
 	private List<Config> extConfig;
-
-	private static ConfigService configService;
 
 	// todo sts support
 
@@ -364,31 +336,22 @@ public class NacosConfigProperties {
 		this.name = name;
 	}
 
-	public Environment getEnvironment() {
-		return environment;
-	}
-
-	public void setEnvironment(Environment environment) {
-		this.environment = environment;
-	}
-
-	/**
-	 * @return ConfigService
-	 */
-	@Deprecated
-	public ConfigService configServiceInstance() {
-		if (null == configService) {
-			try {
-				configService = NacosFactory
-						.createConfigService(getConfigServiceProperties());
-			}
-			catch (NacosException e) {
-				throw new NacosConnectionFailureException(this.getServerAddr(),
-						e.getMessage(), e);
-			}
-		}
-		return configService;
-	}
+//	/**
+//	 * @return ConfigService
+//	 */
+//	public ConfigService configServiceInstance() {
+//		if (null == configService) {
+//			try {
+//				configService = NacosFactory
+//						.createConfigService(getConfigServiceProperties());
+//			}
+//			catch (NacosException e) {
+//				throw new NacosConnectionFailureException(this.getServerAddr(),
+//						e.getMessage(), e);
+//			}
+//		}
+//		return configService;
+//	}
 
 	public Properties getConfigServiceProperties() {
 		Properties properties = new Properties();
@@ -414,26 +377,7 @@ public class NacosConfigProperties {
 		else {
 			properties.put(ENDPOINT, endpoint);
 		}
-
-		enrichNacosConfigProperties(properties);
 		return properties;
-	}
-
-	private void enrichNacosConfigProperties(Properties nacosConfigProperties) {
-		Map<String, Object> properties = PropertySourcesUtils
-				.getSubProperties((ConfigurableEnvironment) environment, PREFIX);
-		properties.forEach((k, v) -> nacosConfigProperties.putIfAbsent(resolveKey(k),
-				String.valueOf(v)));
-	}
-
-	private String resolveKey(String key) {
-		Matcher matcher = PATTERN.matcher(key);
-		StringBuffer sb = new StringBuffer();
-		while (matcher.find()) {
-			matcher.appendReplacement(sb, matcher.group(1).toUpperCase());
-		}
-		matcher.appendTail(sb);
-		return sb.toString();
 	}
 
 	@Override

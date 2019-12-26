@@ -1,11 +1,11 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright (C) 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      https://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,11 +18,13 @@ package com.alibaba.cloud.nacos.client;
 
 import java.util.List;
 
+import com.alibaba.cloud.nacos.NacosConfigManager;
 import com.alibaba.cloud.nacos.NacosConfigProperties;
 import com.alibaba.cloud.nacos.NacosPropertySourceRepository;
 import com.alibaba.cloud.nacos.parser.NacosDataParserHandler;
 import com.alibaba.cloud.nacos.refresh.NacosContextRefresher;
 import com.alibaba.nacos.api.config.ConfigService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,14 +58,17 @@ public class NacosPropertySourceLocator implements PropertySourceLocator {
 
 	private NacosConfigProperties nacosConfigProperties;
 
-	public NacosPropertySourceLocator(NacosConfigProperties nacosConfigProperties) {
+	private NacosConfigManager nacosConfigManager;
+
+	public NacosPropertySourceLocator(NacosConfigProperties nacosConfigProperties, NacosConfigManager nacosConfigManager) {
 		this.nacosConfigProperties = nacosConfigProperties;
+		this.nacosConfigManager = nacosConfigManager;
 	}
 
 	@Override
 	public PropertySource<?> locate(Environment env) {
-		nacosConfigProperties.setEnvironment(env);
-		ConfigService configService = nacosConfigProperties.configServiceInstance();
+
+		ConfigService configService = nacosConfigManager.configServiceInstance();
 
 		if (null == configService) {
 			log.warn("no instance of config service found, can't load config from nacos");
